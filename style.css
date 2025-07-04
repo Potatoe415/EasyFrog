@@ -1,0 +1,32 @@
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden; /* Prevent scrolling */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; /* Center content vertically */
+    background-color: #333; /* Optional background color */
+}
+
+canvas {
+    display: block;
+    background-color: #555; /* Optional canvas background */
+    max-width: 100%;
+    max-height: 100vh;
+    object-fit: contain; /* Maintain aspect ratio */
+}
+
+/* Styles for UI elements (score, level, lives) - basic placeholders */
+#ui {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    color: white;
+    font-family: sans-serif;
+    z-index: 10; /* Ensure UI is above the canvas */
+}
+
+#score, #level, #lives {
+    margin-bottom: 5px;
+}
