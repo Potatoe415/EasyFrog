@@ -13,12 +13,9 @@ let canvasHeight = NUM_ROWS * GRID_SIZE; // Keep this calculation
 // Image Assets
 const imageAssets = {};
 const imageSources = {
-  frog: '/images/frog.png', // Replace with your actual frog image path
-  carRed: '/images/car_red.png', // Example car image path
-  carBlue: '/images/car_blue.png', // Example car image path
-  log: '/images/log.png', // Example log image path
-  turtle: '/images/turtle.png', // Example turtle image path
-  crocodile: '/images/crocodile.png', // Example crocodile image path
+  frog: '/resourcesAI/frog.png',
+  carRed: '/resourcesAI/car_red.png',
+  log: '/resourcesAI/log.png',
   // Add more image sources for different obstacles, background elements, etc.
 };
 let imagesLoaded = 0;
@@ -56,7 +53,6 @@ function loadImages() {
     imageAssets[key].onload = () => {
       imagesLoaded++;
       if (imagesLoaded === totalImages) {
-        console.log("All images loaded");
         // Start the game or show a ready message
         gameLoop();
       }
@@ -85,11 +81,9 @@ function updateUI() {
 }
 
 // Function to draw the frog
-// Function to draw the frog
 function drawFrog() {
   if (imageAssets.frog && !frog.isDiving) { // Only draw if image is loaded and frog is not diving
     ctx.drawImage(imageAssets.frog, frog.x * GRID_SIZE, frog.y * GRID_SIZE, frog.width, frog.height);
-  }
   // In the future, replace this with drawing the frog image asset
 }
 
@@ -110,7 +104,7 @@ function drawRefuges() {
 // Function to draw obstacles (Cars and Water Obstacles)
 function drawObstacles() {
   // Draw Cars
-  cars.forEach(car => {
+  cars.forEach(car => {  // Assuming cars have a 'type' property matching keys in imageAssets
     if (imageAssets[car.type]) { // Use car.type to specify which car image to use
       ctx.drawImage(imageAssets[car.type], car.x, car.y * GRID_SIZE, car.width, car.height);
     } else {
@@ -124,13 +118,8 @@ function drawObstacles() {
   waterObstacles.forEach(obstacle => {
     if (imageAssets[obstacle.type]) {
       // Basic drawing, will need animation logic later for turtles/crocodiles
-      if (obstacle.type === 'turtle' && obstacle.isDiving) {
-        // Don't draw if turtle is diving
-        return;
-      }
-       if (obstacle.type === 'crocodile' && obstacle.isMouthOpen) {
+       if (obstacle.type === 'crocodile' && obstacle.isMouthOpen) { // Placeholder for crocodile animation
            // Draw open mouth crocodile
-           if (imageAssets.crocodileOpenMouth) { // Assuming you have a separate image for open mouth
                ctx.drawImage(imageAssets.crocodileOpenMouth, obstacle.x, obstacle.y * GRID_SIZE, obstacle.width, obstacle.height);
            } else {
                 ctx.fillStyle = 'darkgreen'; // Fallback color
@@ -150,6 +139,7 @@ function drawObstacles() {
 // Game loop
 function gameLoop() {
   requestAnimationFrame(gameLoop);
+  // The core game loop logic will be added here later
 }
 
 // Function to handle keyboard input
@@ -213,11 +203,6 @@ function moveFrog(dx, dy) {
   const newY = frog.y + dy;
 
   if (newX >= 0 && newX < NUM_COLS && newY >= 0 && newY < NUM_ROWS) { // Changed from NUM_ROWS-1 to NUM_ROWS to allow reaching the top row
-    // Simple animation for frog jump (placeholder)
-    // This would ideally be a more complex animation using image frames
-    ctx.fillStyle = '#FF00FF'; // Flash color briefly
-    ctx.fillRect(frog.x * GRID_SIZE, frog.y * GRID_SIZE, GRID_SIZE, GRID_SIZE);
-
 
     // Update frog position
     frog.x = newX;
@@ -300,17 +285,18 @@ window.addEventListener('keydown', handleKeyPress);
 
 // --- Initial Setup ---
 function initGame() {
-    // Set up initial obstacles (example)
-    cars.push({ x: 0, y: 7, width: GRID_SIZE * 2, height: GRID_SIZE, speed: 2, type: 'carRed' });
-    cars.push({ x: canvasWidth / 2, y: 8, width: GRID_SIZE * 3, height: GRID_SIZE, speed: -1.5, type: 'carBlue' });
-    waterObstacles.push({ x: 0, y: 2, width: GRID_SIZE * 3, height: GRID_SIZE, speed: 1, type: 'log' });
-    waterObstacles.push({ x: canvasWidth / 3, y: 2, width: GRID_SIZE, height: GRID_SIZE, speed: 1, type: 'turtle', isDiving: false });
-
+  // Set up initial obstacles (example)
+  // Use the 'type' property to link to the loaded images
+  cars.push({ x: 0, y: 7, width: GRID_SIZE * 2, height: GRID_SIZE, speed: 2, type: 'carRed' });
+  cars.push({ x: canvasWidth / 2, y: 8, width: GRID_SIZE * 3, height: GRID_SIZE, speed: -1.5, type: 'carRed' }); // Using carRed for now
+  waterObstacles.push({ x: 0, y: 2, width: GRID_SIZE * 3, height: GRID_SIZE, speed: 1, type: 'log' });
+  waterObstacles.push({ x: canvasWidth / 3, y: 2, width: GRID_SIZE, height: GRID_SIZE, speed: 1, type: 'log' }); // Using log for now
 }
 
 // Main game loop
 function gameLoop() {
   // Update game state (obstacle positions, animations, etc.)
+  // This function will be expanded in the next steps
   updateGame();
 
   // Clear the canvas
