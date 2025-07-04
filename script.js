@@ -1,14 +1,16 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
-
 // Game Constants
 const GRID_SIZE = 40; // Size of each grid cell
 const NUM_ROWS = 11;
 const NUM_COLS = 15; // Adjust based on desired canvas width
 
 let canvasWidth = NUM_COLS * GRID_SIZE;
-let canvasHeight = NUM_ROWS * GRID_SIZE; // Keep this calculation
+let canvasHeight = NUM_ROWS * GRID_SIZE;
+
+canvas.width = canvasWidth;
+canvas.height = canvasHeight;
 
 // Image Assets
 const imageAssets = {};
@@ -26,10 +28,7 @@ let score = 0;
 let level = 1;
 let lives = 4;
 
-canvas.width = canvasWidth;
-canvas.height = canvasHeight;
-
-// Obstacle Data Structures (Placeholder - will be expanded)
+// Obstacle Data Structures
 let cars = [];
 let waterObstacles = []; // Logs, turtles, crocodiles
 
@@ -53,14 +52,13 @@ function loadImages() {
     imageAssets[key].onload = () => {
       imagesLoaded++;
       if (imagesLoaded === totalImages) {
-        // Start the game or show a ready message
+        initGame();
         gameLoop();
       }
     };
     imageAssets[key].src = imageSources[key];
   }
 }
-
 
 // Function to draw the game background (grid rows)
 function drawBackground() {
@@ -82,21 +80,25 @@ function updateUI() {
 
 // Function to draw the frog
 function drawFrog() {
-  if (imageAssets.frog && !frog.isDiving) { // Only draw if image is loaded and frog is not diving
+  if (imageAssets.frog && !frog.isDiving) {
     ctx.drawImage(imageAssets.frog, frog.x * GRID_SIZE, frog.y * GRID_SIZE, frog.width, frog.height);
-  // In the future, replace this with drawing the frog image asset
+  } else {
+    // Placeholder: draw a green rectangle if no image or diving
+    ctx.fillStyle = '#00FF00';
+    ctx.fillRect(frog.x * GRID_SIZE, frog.y * GRID_SIZE, frog.width, frog.height);
+  }
 }
 
 // Function to draw refuges
 function drawRefuges() {
-  ctx.fillStyle = '#FFFF00'; // Yellow for empty refuges
   for (let i = 0; i < refuges.length; i++) {
+    let slotX = (i * Math.floor(NUM_COLS / refuges.length) + 1) * GRID_SIZE;
     if (!refuges[i]) {
-      ctx.fillRect((i * Math.floor(NUM_COLS / refuges.length) + 1) * GRID_SIZE, REFUGE_ROW * GRID_SIZE, GRID_SIZE * 0.8, GRID_SIZE);
+      ctx.fillStyle = '#FFFF00'; // Yellow for empty refuge
+      ctx.fillRect(slotX, REFUGE_ROW * GRID_SIZE, GRID_SIZE * 0.8, GRID_SIZE);
     } else {
-      // Draw a filled refuge (e.g., a parked frog image or a different color)
-      ctx.fillStyle = '#00FF00'; // Example: Green for filled refuge
-      ctx.fillRect((i * Math.floor(NUM_COLS / refuges.length) + 1) * GRID_SIZE, REFUGE_ROW * GRID_SIZE, GRID_SIZE * 0.8, GRID_SIZE);
+      ctx.fillStyle = '#00FF00'; // Green for filled refuge
+      ctx.fillRect(slotX, REFUGE_ROW * GRID_SIZE, GRID_SIZE * 0.8, GRID_SIZE);
     }
   }
 }
@@ -104,11 +106,10 @@ function drawRefuges() {
 // Function to draw obstacles (Cars and Water Obstacles)
 function drawObstacles() {
   // Draw Cars
-  cars.forEach(car => {  // Assuming cars have a 'type' property matching keys in imageAssets
-    if (imageAssets[car.type]) { // Use car.type to specify which car image to use
+  cars.forEach(car => {
+    if (imageAssets[car.type]) {
       ctx.drawImage(imageAssets[car.type], car.x, car.y * GRID_SIZE, car.width, car.height);
     } else {
-      // Fallback to a colored rectangle if image not loaded
       ctx.fillStyle = car.color || '#000000';
       ctx.fillRect(car.x, car.y * GRID_SIZE, car.width, car.height);
     }
@@ -117,19 +118,9 @@ function drawObstacles() {
   // Draw Water Obstacles
   waterObstacles.forEach(obstacle => {
     if (imageAssets[obstacle.type]) {
-      // Basic drawing, will need animation logic later for turtles/crocodiles
-       if (obstacle.type === 'crocodile' && obstacle.isMouthOpen) { // Placeholder for crocodile animation
-           // Draw open mouth crocodile
-               ctx.drawImage(imageAssets.crocodileOpenMouth, obstacle.x, obstacle.y * GRID_SIZE, obstacle.width, obstacle.height);
-           } else {
-                ctx.fillStyle = 'darkgreen'; // Fallback color
-                ctx.fillRect(obstacle.x, obstacle.y * GRID_SIZE, obstacle.width, obstacle.height);
-           }
-       } else {
-            ctx.drawImage(imageAssets[obstacle.type], obstacle.x, obstacle.y * GRID_SIZE, obstacle.width, obstacle.height);
-       }
+      // Placeholder for crocodile animation
+      ctx.drawImage(imageAssets[obstacle.type], obstacle.x, obstacle.y * GRID_SIZE, obstacle.width, obstacle.height);
     } else {
-      // Fallback
       ctx.fillStyle = obstacle.color || '#00FFFF';
       ctx.fillRect(obstacle.x, obstacle.y * GRID_SIZE, obstacle.width, obstacle.height);
     }
@@ -138,8 +129,19 @@ function drawObstacles() {
 
 // Game loop
 function gameLoop() {
+  // Update game state
+  updateGame();
+
+  // Clear the canvas
+  ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+  // Draw everything
+  drawBackground();
+  drawRefuges();
+  drawObstacles();
+  drawFrog();
+
   requestAnimationFrame(gameLoop);
-  // The core game loop logic will be added here later
 }
 
 // Function to handle keyboard input
@@ -181,14 +183,12 @@ canvas.addEventListener('touchend', (event) => {
   const dy = touchEndY - touchStartY;
 
   if (Math.abs(dx) > Math.abs(dy)) {
-    // Horizontal swipe
     if (dx > 0) {
       moveFrog(1, 0); // Swipe right
     } else {
       moveFrog(-1, 0); // Swipe left
     }
   } else {
-    // Vertical swipe
     if (dy > 0) {
       moveFrog(0, 1); // Swipe down
     } else {
@@ -202,82 +202,76 @@ function moveFrog(dx, dy) {
   const newX = frog.x + dx;
   const newY = frog.y + dy;
 
-  if (newX >= 0 && newX < NUM_COLS && newY >= 0 && newY < NUM_ROWS) { // Changed from NUM_ROWS-1 to NUM_ROWS to allow reaching the top row
-
-    // Update frog position
+  if (newX >= 0 && newX < NUM_COLS && newY >= 0 && newY < NUM_ROWS) {
     frog.x = newX;
     frog.y = newY;
 
     // Check if frog reached a refuge
     if (frog.y === REFUGE_ROW) {
-        checkRefuge();
+      checkRefuge();
     }
   }
 }
 
 // Function to update game state (obstacle movement, animations, etc.)
 function updateGame() {
-    // Implement obstacle movement logic here
-
-    // Implement obstacle animation logic (turtle diving, crocodile mouth)
-
+  // Implement obstacle movement/animation here later
 }
 
 // Function to check if frog reached a refuge
 function checkRefuge() {
-    const refugeIndex = Math.floor(frog.x / Math.floor(NUM_COLS / refuges.length));
-    if (refugeIndex >= 0 && refugeIndex < refuges.length && !refuges[refugeIndex]) {
-        refuges[refugeIndex] = true;
-        score += 100; // Score for reaching a refuge
-        updateUI();
-        resetFrog();
-        checkLevelCompletion();
-    } else {
-        // Frog reached top row but not a valid refuge or refuge is taken
-        loseLife();
-    }
+  const refugeIndex = Math.floor(frog.x / Math.floor(NUM_COLS / refuges.length));
+  if (refugeIndex >= 0 && refugeIndex < refuges.length && !refuges[refugeIndex]) {
+    refuges[refugeIndex] = true;
+    score += 100; // Score for reaching a refuge
+    updateUI();
+    resetFrog();
+    checkLevelCompletion();
+  } else {
+    // Frog reached top row but not a valid refuge or refuge is taken
+    loseLife();
+  }
 }
 
 // Function to reset frog position
 function resetFrog() {
-    frog.x = Math.floor(NUM_COLS / 2);
-    frog.y = NUM_ROWS - 1;
+  frog.x = Math.floor(NUM_COLS / 2);
+  frog.y = NUM_ROWS - 1;
 }
 
 // Function to lose a life
 function loseLife() {
-    lives--;
-    updateUI();
-    if (lives <= 0) {
-        gameOver();
-    } else {
-        resetFrog();
-    }
+  lives--;
+  updateUI();
+  if (lives <= 0) {
+    gameOver();
+  } else {
+    resetFrog();
+  }
 }
 
 // Function to check for level completion
 function checkLevelCompletion() {
-    const allRefugesFilled = refuges.every(refuge => refuge === true);
-    if (allRefugesFilled) {
-        level++;
-        score += level * 500; // Bonus for completing level
-        updateUI();
-        resetLevel();
-    }
+  const allRefugesFilled = refuges.every(refuge => refuge === true);
+  if (allRefugesFilled) {
+    level++;
+    score += level * 500; // Bonus for completing level
+    updateUI();
+    resetLevel();
+  }
 }
 
 // Function to reset level (for next level)
 function resetLevel() {
-    refuges.fill(false); // Reset refuges
-    // TODO: Increase difficulty (speed, number of obstacles)
-    resetFrog();
+  refuges.fill(false);
+  // TODO: Increase difficulty (speed, number of obstacles)
+  resetFrog();
 }
 
 // Function for game over
 function gameOver() {
-    console.log("Game Over!"); // Replace with actual game over screen/message
-    // Stop the game loop
-    // display game over screen
+  console.log("Game Over!"); // Replace with actual game over screen/message
+  // Stop the game loop, display game over screen, etc.
 }
 
 // Add event listeners
@@ -286,33 +280,12 @@ window.addEventListener('keydown', handleKeyPress);
 // --- Initial Setup ---
 function initGame() {
   // Set up initial obstacles (example)
-  // Use the 'type' property to link to the loaded images
-  cars.push({ x: 0, y: 7, width: GRID_SIZE * 2, height: GRID_SIZE, speed: 2, type: 'carRed' });
-  cars.push({ x: canvasWidth / 2, y: 8, width: GRID_SIZE * 3, height: GRID_SIZE, speed: -1.5, type: 'carRed' }); // Using carRed for now
-  waterObstacles.push({ x: 0, y: 2, width: GRID_SIZE * 3, height: GRID_SIZE, speed: 1, type: 'log' });
-  waterObstacles.push({ x: canvasWidth / 3, y: 2, width: GRID_SIZE, height: GRID_SIZE, speed: 1, type: 'log' }); // Using log for now
+  cars.push({ x: 0, y: 2, width: GRID_SIZE * 2, height: GRID_SIZE, speed: 2, type: 'carRed' });
+  cars.push({ x: canvasWidth / 2, y: 3, width: GRID_SIZE * 3, height: GRID_SIZE, speed: -1.5, type: 'carRed' }); // Using carRed for now
+  waterObstacles.push({ x: 0, y: 7, width: GRID_SIZE * 3, height: GRID_SIZE, speed: 1, type: 'log' });
+  waterObstacles.push({ x: canvasWidth / 3, y: 8, width: GRID_SIZE, height: GRID_SIZE, speed: 1, type: 'log' }); // Using log for now
 }
 
-// Main game loop
-function gameLoop() {
-  // Update game state (obstacle positions, animations, etc.)
-  // This function will be expanded in the next steps
-  updateGame();
-
-  // Clear the canvas
-  ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-
-  // Draw everything
-  drawBackground();
-  drawRefuges();
-  drawObstacles(); // Draw obstacles before the frog to layer correctly
-  drawFrog();
-
-  requestAnimationFrame(gameLoop);
-}
-
-// Start the game loop
-gameLoop();
-
-// Initial UI update
+// --- Start the Game ---
+loadImages();
 updateUI();
