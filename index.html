@@ -1,21 +1,54 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <title>EasyFrog</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Frogger Game</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="game-container">
-        <canvas id="gameCanvas"></canvas>
-        <div class="ui-elements">
-            <div id="score">Score: 0</div>
-            <div id="level">Level: 1</div>
-            <div id="lives">Lives: 4</div>
-        </div>
+<div class="game-container">
+    <h1>EasyFrog</h1>
+    <div class="ui-row">
+        <span id="score">Score: 0</span>
+        <span id="level">Niveau: 1</span>
+        <span id="lives">Vies: 4</span>
     </div>
+    <div class="game-canvas-wrapper">
+        <div class="game-bg-block game-bg-water" id="bgWater"></div>
+        <div class="game-bg-block game-bg-road"  id="bgRoad"></div>
+        <canvas id="gameCanvas" style="position:relative;z-index:1;"></canvas>
+    </div>
+    <div class="instructions">
+        <p>
+            <b>Contrôles:</b> 
+            <span class="desktop">Flèches du clavier pour jouer</span>
+            <span class="mobile">Glisser (swipe) pour jouer</span>
+        </p>
+        <p>Appuyez sur <b>Entrée</b> pour (re)démarrer&nbsp;|&nbsp;F3/F4 : Son</p>
+    </div>
+</div>
+<script src="script.js"></script>
+<script>
+function resizeBgBlocks() {
+    const numRows = 11, numCols = 15;
+    const w = Math.min(window.innerWidth * 0.98, 700);
+    const h = Math.floor(w * numRows / numCols);
+    const pxPerRow = h / numRows;
+    document.querySelector('.game-canvas-wrapper').style.height = h + "px";
 
-    <script src="script.js"></script>
+    // Water: rows 1-4 (inclusive)
+    const bgWater = document.getElementById("bgWater");
+    bgWater.style.top = (1 * pxPerRow) + "px";
+    bgWater.style.height = (4 * pxPerRow) + "px";
+
+    // Road: rows 6-9 (inclusive)
+    const bgRoad = document.getElementById("bgRoad");
+    bgRoad.style.top = (6 * pxPerRow) + "px";
+    bgRoad.style.height = (4 * pxPerRow) + "px";
+}
+window.addEventListener('resize', resizeBgBlocks);
+window.addEventListener('load', resizeBgBlocks);
+</script>
 </body>
 </html>

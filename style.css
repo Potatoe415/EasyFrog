@@ -1,32 +1,79 @@
-body {
+html, body {
+    height: 100%;
     margin: 0;
     padding: 0;
-    overflow: hidden; /* Prevent scrolling */
+    background: #e9f8e7;
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+.game-container {
+    max-width: 700px;
+    margin: auto;
+    padding: 1.5em 1em;
+    text-align: center;
+}
+
+h1 {
+    font-size: 2.4em;
+    color: #20700d;
+    letter-spacing: 2px;
+    margin-bottom: 0.2em;
+}
+
+.ui-row {
     display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh; /* Center content vertically */
-    background-color: #333; /* Optional background color */
+    justify-content: space-between;
+    font-size: 1.1em;
+    background: #c8e6c9;
+    border-radius: 1em;
+    padding: 0.7em 1em;
+    margin-bottom: 1em;
+}
+
+
+
+.game-canvas-wrapper {
+    position: relative;
+    width: 100%;
 }
 
 canvas {
+    width: 100%;
+    height: auto;
+    background: transparent;
+    border-radius: 12px;
+    border: 2px solid #81c784;
+    box-shadow: 0 6px 28px rgba(46,90,10,0.11);
     display: block;
-    background-color: #555; /* Optional canvas background */
-    max-width: 100%;
-    max-height: 100vh;
-    object-fit: contain; /* Maintain aspect ratio */
+    margin: auto;
+    touch-action: none;
+    position: relative;
+    z-index: 1;
 }
 
-/* Styles for UI elements (score, level, lives) - basic placeholders */
-#ui {
+.game-bg-block {
     position: absolute;
-    top: 10px;
-    left: 10px;
-    color: white;
-    font-family: sans-serif;
-    z-index: 10; /* Ensure UI is above the canvas */
+    left: 0; width: 100%;
+    z-index: 0;
+    background-repeat: repeat-x;
+    background-size: auto 100%;
+    pointer-events: none;
+}
+.game-bg-water  { background-image: url("resources/background_water.png"); }
+.game-bg-road   { background-image: url("resources/background_road.png"); }
+
+.instructions {
+    font-size: 1.05em;
+    color: #393;
+    margin-top: 1em;
 }
 
-#score, #level, #lives {
-    margin-bottom: 5px;
+.desktop { display: inline; }
+.mobile { display: none; }
+
+@media (max-width: 600px) {
+    .game-container { max-width: 98vw; }
+    .desktop { display: none; }
+    .mobile { display: inline; }
+    .ui-row { font-size: 1em; }
 }
